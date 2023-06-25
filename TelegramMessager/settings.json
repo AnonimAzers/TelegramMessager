@@ -1,0 +1,15 @@
+{
+    "ChatBotToken": "",
+    "time_out": 3600,
+    "wait":  300,
+    "chat_ids": [
+    ],
+    "accounts": [
+        {
+            "api_id": ,
+            "api_hash": "",
+            "chat_text": "",
+            "answer_text": []
+        }
+    ]
+}
