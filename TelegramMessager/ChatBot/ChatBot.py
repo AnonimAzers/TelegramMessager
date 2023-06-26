@@ -21,6 +21,7 @@ class ChatBot:
         
         self.settings_callback = CallbackData("type", "item_name", "bot")
         self.type_callback = CallbackData("type", "item_name")
+        self.remove_callback = CallbackData("type", "item_name", "channel", "remove")
 
         self.register_handlers()
 
@@ -28,10 +29,12 @@ class ChatBot:
         self.dp.register_message_handler(
             self.handle_start_command,
             commands=['start'],
+            state="*"
         )
         self.dp.register_message_handler(
             self.handle_restart_command,
             commands=['restart'],
+            state = "*"
         )
         self.dp.register_callback_query_handler(
             self.bot_settings_menu,
@@ -54,7 +57,16 @@ class ChatBot:
             self.bot_settings_channel,
             text_contains="schannels")
 
-    async def handle_start_command(self, message: types.Message):
+        self.dp.register_callback_query_handler(
+            self.handle_change_time_out,
+            text_contains="time_out")
+
+        self.dp.register_callback_query_handler(
+            self.remove_channel,
+            text_contains="remove_channel")
+
+    async def handle_start_command(self, message: types.Message, state: FSMContext):
+        await state.finish()
         # Обработка команды /start
         choice_keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
             [
@@ -68,37 +80,72 @@ class ChatBot:
                     text="Настройки аккаунтов",
                     callback_data=self.type_callback.new(item_name="account")
                 )
+            ],
+            [
+                types.InlineKeyboardButton(
+                    text="Изменить время задержки между циклами",
+                    callback_data=self.type_callback.new(item_name="time_out")
+                )
             ]
         ])
         await message.answer("Выберите действие:", reply_markup=choice_keyboard)
 
-    async def bot_settings_channel(self, call: types.CallbackQuery):
-        choise_keyboard = types.InlineKeyboardMarkup(inline_keyboard=[[
-            types.InlineKeyboardButton(text=f"{i+1}. {channel}", callback_data=self.type_callback.new(item_name="sdf"))] for i, channel in enumerate(self.settings_dump["chat_ids"])])
-        await call.message.edit_text("Чтобы удалить чат введите id из списка. Чтобы добавить новый - введите его id", reply_markup=choise_keyboard)
+    async def handle_change_time_out(self, call: types.CallbackQuery):
+        await call.message.edit_text(f"Сейчас задержка между циклами рассылки:\n{self.settings_dump['time_out']}\nВведите новое время задержки:")
         state = self.dp.current_state(user=call.from_user.id, chat=call.message.chat.id)
-        await state.set_state("add_channel")
-        self.dp.register_message_handler(self.add_channel, state="add_channel")
+        await state.set_state("change_time_out")
+        self.dp.register_message_handler(self.change_time_out, state="change_time_out")
 
-    async def add_channel(self, message: types.Message, state: FSMContext):
+    async def change_time_out(self, message: types.Message, state: FSMContext):
         try:
-            if int(message.text) in self.settings_dump["chat_ids"]:
-                self.settings_dump["chat_ids"].remove(int(message.text))
-                await message.answer("Канал удален (Перезапустите бота для применения настроек)")
-            else:
-                self.settings_dump["chat_ids"].append(int(message.text))
-                await message.answer("Канал добавлен (Перезапустите бота для применения настроек)")
+            self.settings_dump["time_out"] = int(message.text)
+            await message.answer("Время задержки успешно изменено (Перезапустите бота для применения настроек)")
             await state.finish()
             with open("settings.json", 'w', encoding="utf-8") as file:
                 json.dump(self.settings_dump, file, indent=4)
         except:
             await message.answer("Что-то не так")
 
+    async def bot_settings_channel(self, call: types.CallbackQuery):
+        choise_keyboard = types.InlineKeyboardMarkup(inline_keyboard=[[
+            types.InlineKeyboardButton(text=f"{i+1}. {channel}", callback_data=self.settings_callback.new(item_name="sdfsdf", bot=channel))] for i, channel in enumerate(self.settings_dump["chat_ids"])])
+        await call.message.edit_text("Чтобы удалить чат введите id/username из списка. Чтобы добавить новый - введите его id/username", reply_markup=choise_keyboard)
+        state = self.dp.current_state(user=call.from_user.id, chat=call.message.chat.id)
+        await state.set_state("add_channel")
+        self.dp.register_message_handler(self.add_channel, state="add_channel")
+
+    async def remove_channel(self, call: types.CallbackQuery):
+        channel = call.data.split(":")[2]
+        remove = call.data.split(":")[3]
+        if remove == "1":
+            self.settings_dump["chat_ids"].remove(channel)
+            await call.message.edit_text("Канал удален (Перезапустите бота для применения настроек)")
+        else:
+            await call.message.edit_text("Вы отменили удаление канала")
+
+    async def add_channel(self, message: types.Message, state: FSMContext):
+        try:
+            await state.finish()
+            if message.text in self.settings_dump["chat_ids"]:
+                choise_keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
+                    [types.InlineKeyboardButton(text="Да", callback_data=self.remove_callback.new(item_name="remove_channel", channel=message.text, remove="1")), 
+                     types.InlineKeyboardButton(text="Нет", callback_data=self.remove_callback.new(item_name="remove_channel", channel=message.text, remove="0"))]])
+                await message.answer("Этот чат уже был ранее введён. Хотите его удалить?", reply_markup=choise_keyboard)
+                return
+            else:
+                self.settings_dump["chat_ids"].append(message.text)
+                await message.answer("Канал добавлен (Перезапустите бота для применения настроек)")
+            with open("settings.json", 'w', encoding="utf-8") as file:
+                json.dump(self.settings_dump, file, indent=4)
+        except Exception as ex:
+            print(ex)
+            await message.answer("Что-то не так")
+
     async def account_settings(self, call: types.CallbackQuery):
         # Обработка команды /start
         choice_account = types.InlineKeyboardMarkup(inline_keyboard=[
             [types.InlineKeyboardButton(
-                text=f"{i + 1}. Бот: {bot.api_id}",
+                text=f"{i + 1}. Бот: {bot.api_id} ({bot.client.me.username})",
                 callback_data=self.settings_callback.new(item_name="settings", bot=bot.api_id)
             )]
             for i, bot in enumerate(self.bot_list)
@@ -163,6 +210,9 @@ class ChatBot:
         self.update_settings('chat_text', message.text, self.bot_id)
 
     async def handle_enter_answer_text(self, message: types.Message, state: FSMContext):
+        if len(message.text.split("/")) < 2:
+            await message.answer("Ой, что-то не так. Повторите еще раз!")
+            return
         await state.finish()
         await message.answer("Текст ответа успешно обновлен.  (Перезапустите бота для установки настроек)")
 
@@ -171,7 +221,6 @@ class ChatBot:
 
 
     def update_settings(self, type, text, bot_id):
-        print(type, text, bot_id)
         # Обновление настроек в JSON-файле
         # Получение актуальных настроек
         settings = self.load_settings()

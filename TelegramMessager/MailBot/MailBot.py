@@ -18,7 +18,6 @@ class MailBot:
         self.client = Client(name = f"sessions//{api_id}_session", api_id = api_id, api_hash = api_hash)       
 
     async def mailing(self, user_id):
-        print("test")
         await asyncio.sleep(300)
         await self.client.send_message(user_id, self.answer_text[0])
         await asyncio.sleep(3600*24)
@@ -37,8 +36,13 @@ class MailBot:
             for chat_id in self.chat_ids:
                 try:
                     await self.client.send_message(chat_id, self.chat_text)
-                except:
-                    print("Проблема с отправкой сообщения")
+                except Exception as ex:
+                    if str(type(ex)) == "<class 'pyrogram.errors.exceptions.forbidden_403.ChatWriteForbidden'>":
+                        try:
+                            await self.client.join_chat(chat_id)
+                            await self.client.send_message(chat_id, self.chat_text)
+                        except:
+                            continue
                 await asyncio.sleep(5)
             await asyncio.sleep(self.time_out)
 
