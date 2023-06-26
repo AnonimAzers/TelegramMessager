@@ -1,12 +1,81 @@
 {
-    "ChatBotToken": "6138250045:AAFSxWRmJqF_phvh1SwW8G8nk-RHyc2yaYQ",
-    "time_out": 3500,
-    "wait": 300,
-    "chat_ids": [
-        "freeassistant",
-        "@freelancervchate",
-        "vakanssii"
-    ],
-    "accounts": [
-    ]
+  "ChatBotToken": "6138250045:AAFSxWRmJqF_phvh1SwW8G8nk-RHyc2yaYQ",
+  "time_out": 3500,
+  "wait": 300,
+  "chat_ids": [
+  ],
+  "accounts": [
+    {
+      "api_id": 27892703,
+      "api_hash": "4b83d3dd55ecb0c7b098f53a6b59d0c8",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 20397731,
+      "api_hash": "75d65a3acb7775a72487306d6e90eed4",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 23304436,
+      "api_hash": "a077a910b57370d4d2556089297ca170",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 23708279,
+      "api_hash": "875bac056886ef50e430c8c292759105",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 23230791,
+      "api_hash": "9b8d1de28cc037cfdfb3b9074c1ae330",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 24539097,
+      "api_hash": "ca65e73ed09f2d88dacc2e60c5e4a120",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 26136215,
+      "api_hash": "a56ba4a04b8f8d3936e6f3cd131bf1a3",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    },
+    {
+      "api_id": 22995227,
+      "api_hash": "d32e37a30c1e0c018dda4ed778a57c56",
+      "chat_text": "Ищу...",
+      "answer_text": [
+        "Привет. Как дела?",
+        "Это сообщение спустя 24 часа"
+      ]
+    }
+  ]
 }
